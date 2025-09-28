@@ -27,10 +27,26 @@ def parse_xml(file_content, filename):
     data = []
 
     def walk_tree(node, path=""):
+        tag_path = f"{path}/{node.tag}" if path else node.tag
+
+        # Capture attributes
+        for attr_name, attr_value in node.attrib.items():
+            data.append({
+                "File": filename,
+                "Tag": f"{tag_path}[@{attr_name}]",
+                "Value": attr_value
+            })
+
+        # Capture text content (if present)
+        if node.text and node.text.strip():
+            data.append({
+                "File": filename,
+                "Tag": tag_path,
+                "Value": node.text.strip()
+            })
+
+        # Recurse for children
         for child in node:
-            tag_path = f"{path}/{child.tag}" if path else child.tag
-            if child.text and child.text.strip():
-                data.append({"File": filename, "Tag": tag_path, "Value": child.text.strip()})
             walk_tree(child, tag_path)
 
     walk_tree(root)
